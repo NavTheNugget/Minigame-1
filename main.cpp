@@ -14,6 +14,9 @@ typedef struct {
 	Vector2f location;
 	bool destroyed = false;
 } Object;
+typedef struct {
+	unsigned long long int score;
+} Game;
 
 random_device rd;
 default_random_engine rng(rd());
@@ -52,6 +55,9 @@ int main(int argc, char* argv[]) {
 	Object* o = generateObject(init, previousLocation);
 	init = true;
 	
+	Game game;
+	game.score = 0;
+	
 	while (running) {
 		frameStart = SDL_GetTicks();
 		
@@ -74,6 +80,8 @@ int main(int argc, char* argv[]) {
 		if (checkCollision(o, player)) {
 			o->destroyed = true;
 			delete o;
+			++game.score;
+			// cout << game.score << endl;
 			
 			o = generateObject(init, previousLocation);
 		}
