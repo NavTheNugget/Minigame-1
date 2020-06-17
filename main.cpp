@@ -26,6 +26,8 @@ bool isKeyPressed(SDL_Scancode key);
 int getRandomInt(int min, int max);
 Object* generateObject(bool init, Vector2f previousLocation);
 
+bool checkCollision(Object* object, SDL_Rect player);
+
 int main(int argc, char* argv[]) {
 	Vector2f previousLocation; previousLocation.x = previousLocation.y = 0;
 	
@@ -57,10 +59,22 @@ int main(int argc, char* argv[]) {
 		
 		if (isKeyPressed(SDL_SCANCODE_A))
 			playerVelocity.x = -playerSpeed;
-		else if (isKeyPressed(SDL_SCANCODE_D))
+		if (isKeyPressed(SDL_SCANCODE_D))
 			playerVelocity.x = playerSpeed;
+		else if (isKeyPressed(SDL_SCANCODE_S))
+			playerVelocity.y = playerSpeed;
+		else if (isKeyPressed(SDL_SCANCODE_W))
+			playerVelocity.y = -playerSpeed;
 		
 		player.x += playerVelocity.x;
+		player.y += playerVelocity.y;
+		
+		if (checkCollision(o, player)) {
+			o->destroyed = true;
+			delete o;
+			
+			o = generateObject(init, previousLocation);
+		}
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
@@ -76,6 +90,8 @@ int main(int argc, char* argv[]) {
 		SDL_RenderPresent(renderer);
 		
 		playerVelocity.x = playerVelocity.y = 0;
+		
+		previousLocation = o->location;
 		
 		frameTime = SDL_GetTicks() - frameStart;
 		if (frameDelay > frameTime)
@@ -116,6 +132,35 @@ Object* generateObject(bool init, Vector2f previousLocation) {
 		}
 	}
 	return object;
+}
+bool checkCollision(Object* object, SDL_Rect player) {
+	unsigned int width = 25;
+	unsigned int height = 25;
+	float bottomA, bottomB;
+	float topA, topB;
+	float rightA, rightB;
+	float leftA, leftB;
+	
+	leftA = object->location.x;
+	topA = object->location.y;
+	rightA = object->location.x+width;
+	bottomA = object->location.y+height;
+	
+	topB = player.y;
+	leftB = player.x;
+	rightB = player.x+player.w;
+	bottomB = player.y+player.h;
+	
+	if (bottomA <= topB)
+		return false;
+	if (topA >= bottomB)
+		return false;
+	if (rightA <= leftB)
+		return false;
+	if (leftA >= rightB)
+		return false;
+	
+	return true;
 }
 int getRandomInt(int min, int max) {
 	uniform_int_distribution<int> dist(min, max);
