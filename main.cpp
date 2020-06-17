@@ -25,6 +25,7 @@ const Uint8* keyboardState = SDL_GetKeyboardState(0);
 
 bool isKeyPressed(SDL_Scancode key);
 int getRandomInt(int min, int max);
+double getRandomDouble(double min, double max);
 Object* generateObject(bool init, Vector2f previousLocation);
 
 bool checkCollision(Object* object, SDL_Rect player);
@@ -165,5 +166,9 @@ bool checkCollision(Object* object, SDL_Rect player) {
 }
 int getRandomInt(int min, int max) {
 	uniform_int_distribution<int> dist(min, max);
+	return dist(rng);
+}
+double getRandomDouble(double min, double max) {
+	uniform_real_distribution<double> dist(min, max);
 	return dist(rng);
 }
