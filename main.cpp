@@ -116,19 +116,19 @@ bool isKeyPressed(SDL_Scancode key) {
 Object* generateObject(bool init, Vector2f previousLocation) {
 	Object* object = new Object();
 	if (!init) {
-		object->location.x = getRandomInt(0, SCREEN_WIDTH);
-		object->location.y = getRandomInt(0, SCREEN_HEIGHT);
+		object->location.x = getRandomInt(0, SCREEN_WIDTH-50);
+		object->location.y = getRandomInt(0, SCREEN_HEIGHT-50);
 	} else {
 		if (previousLocation.x > SCREEN_WIDTH/2) {
 			object->location.x = getRandomInt(0, SCREEN_WIDTH/2);
 		} else {
-			object->location.x = getRandomInt(SCREEN_WIDTH/2, SCREEN_WIDTH);
+			object->location.x = getRandomInt(SCREEN_WIDTH/2, SCREEN_WIDTH-50);
 		}
 		
 		if (previousLocation.y > SCREEN_HEIGHT/2) {
-			object->location.y = getRandomInt(0, SCREEN_HEIGHT);
+			object->location.y = getRandomInt(0, SCREEN_HEIGHT-50);
 		} else {
-			object->location.y = getRandomInt(SCREEN_HEIGHT/2, SCREEN_HEIGHT);
+			object->location.y = getRandomInt(SCREEN_HEIGHT/2, SCREEN_HEIGHT-50);
 		}
 	}
 	return object;
