@@ -14,26 +14,26 @@ typedef struct {
 	bool destroyed = false;
 } Object;
 
-vector<Object> objects;
 random_device rd;
 default_random_engine rng(rd());
+bool init = false;
 const unsigned int SCREEN_WIDTH = 640;
 const unsigned int SCREEN_HEIGHT = 480;
 const std::string SCREEN_TITLE = "Minigame";
 const Uint8* keyboardState = SDL_GetKeyboardState(0);
 
-void generateGame(unsigned int maxObjects);
 bool isKeyPressed(SDL_Scancode key);
 int getRandomInt(int min, int max);
+Object* generateObject(bool init, Vector2f previousLocation);
+
 int main(int argc, char* argv[]) {
+	Vector2f previousLocation; previousLocation.x = previousLocation.y = 0;
 	
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Window* window = SDL_CreateWindow(SCREEN_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
 	bool running = true;
 	SDL_Event event;
-	
-	generateGame(10);
 	
 	Vector2f playerVelocity;
 	SDL_Rect player = {10,10,25,25};
@@ -44,6 +44,9 @@ int main(int argc, char* argv[]) {
 	const int frameDelay = 1000 / FPS;
 	
 	Uint32 frameStart, frameTime;
+	
+	Object* o = generateObject(init, previousLocation);
+	init = true;
 	
 	while (running) {
 		frameStart = SDL_GetTicks();
@@ -65,9 +68,9 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(renderer, &player);
 		
-		for (unsigned int i = 0; i < objects.size(); ++i) {
-			SDL_Rect rect = { (int)objects[i].location.x, (int)objects[i].location.y, 10, 10 };
-			SDL_RenderFillRect(renderer, &rect);
+		if (!o->destroyed) {
+			SDL_Rect objectRect = { (int)o->location.x, (int)o->location.y, 15, 15 };
+			SDL_RenderFillRect(renderer, &objectRect);
 		}
 		
 		SDL_RenderPresent(renderer);
@@ -83,6 +86,8 @@ int main(int argc, char* argv[]) {
 	SDL_DestroyRenderer(renderer);
 	SDL_Quit();
 	
+	delete o;
+	
 	return 0;
 }
 
@@ -92,33 +97,25 @@ bool isKeyPressed(SDL_Scancode key) {
 			return true;
 	return false;
 }
-void generateGame(unsigned int maxObjects) {
-	Vector2f previous;
-	for (unsigned int i = 0; i < maxObjects; ++i) {
-		Object o;
-		Vector2f location;
-		if (i == 0)
-			location.x = getRandomInt(50, SCREEN_WIDTH-50);
-		else
-			if (previous.x > SCREEN_WIDTH-50/2)
-				location.x = getRandomInt(50,SCREEN_WIDTH/2);
-			else
-				location.x = getRandomInt(SCREEN_WIDTH/2+50,SCREEN_WIDTH-50);
-			
-		if (i == 0)
-			 location.x = getRandomInt(50, SCREEN_WIDTH-50);
-		else 
-			if (previous.y > SCREEN_HEIGHT-50/2)
-				location.y = getRandomInt(50, SCREEN_HEIGHT/2);
-			else 
-				location.y = getRandomInt(SCREEN_HEIGHT/2+50,SCREEN_HEIGHT);
-				
-		o.location = location;
+Object* generateObject(bool init, Vector2f previousLocation) {
+	Object* object = new Object();
+	if (!init) {
+		object->location.x = getRandomInt(0, SCREEN_WIDTH);
+		object->location.y = getRandomInt(0, SCREEN_HEIGHT);
+	} else {
+		if (previousLocation.x > SCREEN_WIDTH/2) {
+			object->location.x = getRandomInt(0, SCREEN_WIDTH/2);
+		} else {
+			object->location.x = getRandomInt(SCREEN_WIDTH/2, SCREEN_WIDTH);
+		}
 		
-		objects.push_back(o);
-		
-		previous = location;
+		if (previousLocation.y > SCREEN_HEIGHT/2) {
+			object->location.y = getRandomInt(0, SCREEN_HEIGHT);
+		} else {
+			object->location.y = getRandomInt(SCREEN_HEIGHT/2, SCREEN_HEIGHT);
+		}
 	}
+	return object;
 }
 int getRandomInt(int min, int max) {
 	uniform_int_distribution<int> dist(min, max);
