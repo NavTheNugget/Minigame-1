@@ -24,10 +24,11 @@ default_random_engine rng(rd());
 bool init = false;
 const unsigned int SCREEN_WIDTH = 640;
 const unsigned int SCREEN_HEIGHT = 480;
-const std::string SCREEN_TITLE = "Minigame";
+const std::string SCREEN_TITLE = "Colliders";
 const Uint8* keyboardState = SDL_GetKeyboardState(0);
 
 int currentScreen = 0; // -1 Menu 0 Game 1 Credits 2 Controls
+int timer = 0;
 
 bool isKeyPressed(SDL_Scancode key);
 int getRandomInt(int min, int max);
@@ -61,15 +62,20 @@ int main(int argc, char* argv[]) {
 	Game game;
 	game.score = 0;
 	
+	timer = 60;
+	int ticks = 0;
+	
 	// Loading the Font
 	TTF_Init();
 	TTF_Font* font = TTF_OpenFont("Minecraft.ttf", 36);
 	SDL_Color white = { 0, 255, 0 };
 	SDL_Rect ScoreRectSize = { 0, 15, 0, 0 };
+	SDL_Rect TimerRect = {0,15,0,0};
 	
 
 	SDL_Texture* texture;
 	SDL_Surface* surface;
+	SDL_Texture* texture2;
 	
 	while (running) {
 		frameStart = SDL_GetTicks();
@@ -78,8 +84,17 @@ int main(int argc, char* argv[]) {
 		if (event.type == SDL_QUIT)
 			running = false;
 		
+		if (timer == 0) {
+			// Redirect to the Score Screen
+			currentScreen = 1;
+		}
 		
 		if (currentScreen == 0) {
+			if (ticks == 100) {
+				--timer;
+				ticks = 0;
+			}
+			
 			if (isKeyPressed(SDL_SCANCODE_A))
 				playerVelocity.x = -playerSpeed;
 			if (isKeyPressed(SDL_SCANCODE_D))
@@ -95,9 +110,14 @@ int main(int argc, char* argv[]) {
 			surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
 			texture = SDL_CreateTextureFromSurface(renderer, surface);
 			SDL_FreeSurface(surface);
+			surface = TTF_RenderText_Blended(font, to_string(timer).c_str(), white);
+			texture2 = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_FreeSurface(surface);
 		
 			SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRectSize.w, &ScoreRectSize.h);
+			SDL_QueryTexture(texture2, nullptr, nullptr, &TimerRect.w, &TimerRect.h);
 			ScoreRectSize.x = SCREEN_WIDTH-ScoreRectSize.w-15;
+			TimerRect.x = 25;
 		
 			if (checkCollision(o, player)) {
 				o->destroyed = true;
@@ -123,10 +143,9 @@ int main(int argc, char* argv[]) {
 			}
 		
 			SDL_RenderCopy(renderer, texture, nullptr, &ScoreRectSize);
-		} else if (currentScreen == -1) {
-			// Render the controls
+			SDL_RenderCopy(renderer, texture2, nullptr, &TimerRect);
 		} else if (currentScreen == 1) {
-			// Render the credits
+			// Render the Score, Todo
 		}
 		
 		SDL_RenderPresent(renderer);
@@ -134,8 +153,10 @@ int main(int argc, char* argv[]) {
 		playerVelocity.x = playerVelocity.y = 0;
 		previousLocation = o->location;
 		
-		SDL_DestroyTexture(texture);
-		
+		if (currentScreen == 0){
+			++ticks;
+			SDL_DestroyTexture(texture);
+		}	
 		frameTime = SDL_GetTicks() - frameStart;
 		if (frameDelay > frameTime)
 			SDL_Delay(frameDelay-frameTime);
