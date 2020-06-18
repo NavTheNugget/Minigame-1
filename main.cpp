@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
 	SDL_Event event;
 	
 	Vector2f playerVelocity;
-	SDL_Rect player = {10,10,25,25};
+	SDL_Rect player = {100,100,25,25};
 	playerVelocity.x=playerVelocity.y=0;
 	float playerSpeed = 2.5f;
 	
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 				o->destroyed = true;
 				delete o;
 				++game.score;
-				playerSpeed += 0.01f;
+				playerSpeed += 0.1f;
 				// cout << game.score << endl;
 			
 				o = generateObject(init, previousLocation);
