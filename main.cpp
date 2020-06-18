@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
 		
 		SDL_Surface* surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+		SDL_FreeSurface(surface);
 		
 		SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRectSize.w, &ScoreRectSize.h);
 		ScoreRectSize.x = SCREEN_WIDTH-ScoreRectSize.w-15;
@@ -115,8 +116,9 @@ int main(int argc, char* argv[]) {
 		SDL_RenderPresent(renderer);
 		
 		playerVelocity.x = playerVelocity.y = 0;
-		
 		previousLocation = o->location;
+		
+		SDL_DestroyTexture(texture);
 		
 		frameTime = SDL_GetTicks() - frameStart;
 		if (frameDelay > frameTime)
