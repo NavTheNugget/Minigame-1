@@ -27,7 +27,7 @@ const unsigned int SCREEN_HEIGHT = 480;
 const std::string SCREEN_TITLE = "Colliders";
 const Uint8* keyboardState = SDL_GetKeyboardState(0);
 
-int currentScreen = 0; // -1 Menu 0 Game 1 Credits 2 Controls
+int currentScreen = -1; // -1 Menu 0 Game 1 Credits 2 Controls
 int timer = 0;
 
 bool isKeyPressed(SDL_Scancode key);
@@ -68,11 +68,16 @@ int main(int argc, char* argv[]) {
 	// Loading the Font
 	TTF_Init();
 	TTF_Font* font = TTF_OpenFont("Minecraft.ttf", 36);
+	TTF_Font* smallFont = TTF_OpenFont("Minecraft.ttf", 24);
 	SDL_Color white = { 0, 255, 0 };
 	SDL_Color red = {255,0,0};
+	SDL_Color amber = {255,191,0};
 	SDL_Rect ScoreRectSize = { 0, 15, 0, 0 };
 	SDL_Rect TimerRect = {0,15,0,0};
 	SDL_Rect ScoreRect = {0,0,0,0};
+	
+	SDL_Rect EnterButton = {0,0,0,0};
+	SDL_Rect Credits = {0,0,0,0};
 	
 
 	SDL_Texture* texture;
@@ -145,6 +150,12 @@ int main(int argc, char* argv[]) {
 				player.x = player.y = 100;
 				playerSpeed = 2.5f;
 				currentScreen = 0;
+			} else if (isKeyPressed(SDL_SCANCODE_ESCAPE)) {
+				game.score = 0;
+				timer = 60;
+				player.x = player.y = 100;
+				playerSpeed = 2.5f;
+				currentScreen = -1;
 			}
 			
 			string text = "Your Score Was "+to_string(game.score);
@@ -155,6 +166,29 @@ int main(int argc, char* argv[]) {
 			SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRect.w, &ScoreRect.h);
 			ScoreRect.x = SCREEN_WIDTH/2-ScoreRect.w/2;
 			ScoreRect.y = SCREEN_HEIGHT/2-ScoreRect.h/2;
+		} else if (currentScreen == -1) {
+			surface = TTF_RenderText_Blended(font, "Press Enter to Start", white);
+			texture = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_FreeSurface(surface);
+			surface = TTF_RenderText_Blended(smallFont, "Created by NAV 2020", amber);
+			texture2 = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_FreeSurface(surface);
+			
+			SDL_QueryTexture(texture, nullptr, nullptr, &EnterButton.w, &EnterButton.h);
+			SDL_QueryTexture(texture2, nullptr, nullptr, &Credits.w, &Credits.h);
+			EnterButton.x = SCREEN_WIDTH/2-EnterButton.w/2;
+			EnterButton.y = SCREEN_HEIGHT/2-EnterButton.h/2;
+			
+			Credits.x = SCREEN_WIDTH/2-Credits.w/2;
+			Credits.y = (SCREEN_HEIGHT/2-Credits.h/2)+EnterButton.h+5;
+			
+			if (isKeyPressed(SDL_SCANCODE_RETURN)) {
+				game.score = 0;
+				timer = 60;
+				player.x = player.y = 100;
+				playerSpeed = 2.5f;
+				currentScreen = 0;
+			}
 		}
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -174,6 +208,9 @@ int main(int argc, char* argv[]) {
 		} else if (currentScreen == 1) {
 			// Render the Score, Todo
 			SDL_RenderCopy(renderer, texture, nullptr, &ScoreRect);
+		} else if (currentScreen == -1) {
+			SDL_RenderCopy(renderer, texture, nullptr, &EnterButton);
+			SDL_RenderCopy(renderer, texture2, nullptr, &Credits);
 		}
 		
 		SDL_RenderPresent(renderer);
@@ -187,6 +224,9 @@ int main(int argc, char* argv[]) {
 			SDL_DestroyTexture(texture2);
 		} else if (currentScreen == 1) {
 			SDL_DestroyTexture(texture);
+		} else if (currentScreen == -1) {
+			SDL_DestroyTexture(texture);
+			SDL_DestroyTexture(texture2);
 		}
 		frameTime = SDL_GetTicks() - frameStart;
 		if (frameDelay > frameTime)
