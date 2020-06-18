@@ -140,9 +140,11 @@ int main(int argc, char* argv[]) {
 			}
 		} else if (currentScreen == 1) {
 			if (isKeyPressed(SDL_SCANCODE_RETURN)) {
-				currentScreen = 0;
 				game.score = 0;
 				timer = 60;
+				player.x = player.y = 100;
+				playerSpeed = 2.5f;
+				currentScreen = 0;
 			}
 			
 			string text = "Your Score Was "+to_string(game.score);
