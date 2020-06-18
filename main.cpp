@@ -69,14 +69,15 @@ int main(int argc, char* argv[]) {
 	TTF_Init();
 	TTF_Font* font = TTF_OpenFont("Minecraft.ttf", 36);
 	SDL_Color white = { 0, 255, 0 };
+	SDL_Color red = {255,0,0};
 	SDL_Rect ScoreRectSize = { 0, 15, 0, 0 };
 	SDL_Rect TimerRect = {0,15,0,0};
+	SDL_Rect ScoreRect = {0,0,0,0};
 	
 
 	SDL_Texture* texture;
 	SDL_Surface* surface;
 	SDL_Texture* texture2;
-	
 	while (running) {
 		frameStart = SDL_GetTicks();
 		
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
 			surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
 			texture = SDL_CreateTextureFromSurface(renderer, surface);
 			SDL_FreeSurface(surface);
-			surface = TTF_RenderText_Blended(font, to_string(timer).c_str(), white);
+			surface = TTF_RenderText_Blended(font, to_string(timer).c_str(), red);
 			texture2 = SDL_CreateTextureFromSurface(renderer, surface);
 			SDL_FreeSurface(surface);
 		
@@ -128,6 +129,15 @@ int main(int argc, char* argv[]) {
 			
 				o = generateObject(init, previousLocation);
 			}
+		} else if (currentScreen == 1) {
+			string text = "Your Score Was "+to_string(game.score);
+			surface = TTF_RenderText_Blended(font, text.c_str(), white);
+			texture = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_FreeSurface(surface);
+			
+			SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRect.w, &ScoreRect.h);
+			ScoreRect.x = SCREEN_WIDTH/2-ScoreRect.w/2;
+			ScoreRect.y = SCREEN_HEIGHT/2-ScoreRect.h/2;
 		}
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -146,6 +156,7 @@ int main(int argc, char* argv[]) {
 			SDL_RenderCopy(renderer, texture2, nullptr, &TimerRect);
 		} else if (currentScreen == 1) {
 			// Render the Score, Todo
+			SDL_RenderCopy(renderer, texture, nullptr, &ScoreRect);
 		}
 		
 		SDL_RenderPresent(renderer);
@@ -156,7 +167,10 @@ int main(int argc, char* argv[]) {
 		if (currentScreen == 0){
 			++ticks;
 			SDL_DestroyTexture(texture);
-		}	
+			SDL_DestroyTexture(texture2);
+		} else if (currentScreen == 1) {
+			SDL_DestroyTexture(texture);
+		}
 		frameTime = SDL_GetTicks() - frameStart;
 		if (frameDelay > frameTime)
 			SDL_Delay(frameDelay-frameTime);
