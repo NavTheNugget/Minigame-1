@@ -106,7 +106,16 @@ int main(int argc, char* argv[]) {
 				playerVelocity.y = -playerSpeed;
 		
 			player.x += playerVelocity.x;
+			if (player.x+player.w >= SCREEN_WIDTH)
+				player.x -= playerVelocity.x;
+			else if (player.x <= 0)
+				player.x -= playerVelocity.x;
+			
 			player.y += playerVelocity.y;
+			if (player.y+player.h >= SCREEN_HEIGHT)
+				player.y -= playerVelocity.y;
+			else if (player.y <= 0)
+				player.y -= playerVelocity.y;
 		
 			surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
 			texture = SDL_CreateTextureFromSurface(renderer, surface);
@@ -144,9 +153,9 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(renderer);
 		
 		if (currentScreen == 0) {
-			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_SetRenderDrawColor(renderer, 255, 191, 0, 255);
 			SDL_RenderFillRect(renderer, &player);
-		
+			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 			if (!o->destroyed) { 
 				SDL_Rect objectRect = { (int)o->location.x, (int)o->location.y, 15, 15 };
 				SDL_RenderFillRect(renderer, &objectRect);
