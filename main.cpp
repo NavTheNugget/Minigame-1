@@ -27,6 +27,8 @@ const unsigned int SCREEN_HEIGHT = 480;
 const std::string SCREEN_TITLE = "Minigame";
 const Uint8* keyboardState = SDL_GetKeyboardState(0);
 
+int currentScreen = 0; // -1 Menu 0 Game 1 Credits 2 Controls
+
 bool isKeyPressed(SDL_Scancode key);
 int getRandomInt(int min, int max);
 double getRandomDouble(double min, double max);
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
 	Vector2f playerVelocity;
 	SDL_Rect player = {10,10,25,25};
 	playerVelocity.x=playerVelocity.y=0;
-	const float playerSpeed = 2.5f;
+	float playerSpeed = 2.5f;
 	
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;
@@ -65,6 +67,10 @@ int main(int argc, char* argv[]) {
 	SDL_Color white = { 0, 255, 0 };
 	SDL_Rect ScoreRectSize = { 0, 15, 0, 0 };
 	
+
+	SDL_Texture* texture;
+	SDL_Surface* surface;
+	
 	while (running) {
 		frameStart = SDL_GetTicks();
 		
@@ -72,46 +78,56 @@ int main(int argc, char* argv[]) {
 		if (event.type == SDL_QUIT)
 			running = false;
 		
-		if (isKeyPressed(SDL_SCANCODE_A))
-			playerVelocity.x = -playerSpeed;
-		if (isKeyPressed(SDL_SCANCODE_D))
-			playerVelocity.x = playerSpeed;
-		if (isKeyPressed(SDL_SCANCODE_S))
-			playerVelocity.y = playerSpeed;
-		if (isKeyPressed(SDL_SCANCODE_W))
-			playerVelocity.y = -playerSpeed;
 		
-		player.x += playerVelocity.x;
-		player.y += playerVelocity.y;
+		if (currentScreen == 0) {
+			if (isKeyPressed(SDL_SCANCODE_A))
+				playerVelocity.x = -playerSpeed;
+			if (isKeyPressed(SDL_SCANCODE_D))
+				playerVelocity.x = playerSpeed;
+			if (isKeyPressed(SDL_SCANCODE_S))
+				playerVelocity.y = playerSpeed;
+			if (isKeyPressed(SDL_SCANCODE_W))
+				playerVelocity.y = -playerSpeed;
 		
-		SDL_Surface* surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-		SDL_FreeSurface(surface);
+			player.x += playerVelocity.x;
+			player.y += playerVelocity.y;
 		
-		SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRectSize.w, &ScoreRectSize.h);
-		ScoreRectSize.x = SCREEN_WIDTH-ScoreRectSize.w-15;
+			surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
+			texture = SDL_CreateTextureFromSurface(renderer, surface);
+			SDL_FreeSurface(surface);
 		
-		if (checkCollision(o, player)) {
-			o->destroyed = true;
-			delete o;
-			++game.score;
-			// cout << game.score << endl;
+			SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRectSize.w, &ScoreRectSize.h);
+			ScoreRectSize.x = SCREEN_WIDTH-ScoreRectSize.w-15;
+		
+			if (checkCollision(o, player)) {
+				o->destroyed = true;
+				delete o;
+				++game.score;
+				playerSpeed += 0.01f;
+				// cout << game.score << endl;
 			
-			o = generateObject(init, previousLocation);
+				o = generateObject(init, previousLocation);
+			}
 		}
 		
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_RenderFillRect(renderer, &player);
+		if (currentScreen == 0) {
+			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_RenderFillRect(renderer, &player);
 		
-		if (!o->destroyed) {
-			SDL_Rect objectRect = { (int)o->location.x, (int)o->location.y, 15, 15 };
-			SDL_RenderFillRect(renderer, &objectRect);
+			if (!o->destroyed) { 
+				SDL_Rect objectRect = { (int)o->location.x, (int)o->location.y, 15, 15 };
+				SDL_RenderFillRect(renderer, &objectRect);
+			}
+		
+			SDL_RenderCopy(renderer, texture, nullptr, &ScoreRectSize);
+		} else if (currentScreen == -1) {
+			// Render the controls
+		} else if (currentScreen == 1) {
+			// Render the credits
 		}
-		
-		SDL_RenderCopy(renderer, texture, nullptr, &ScoreRectSize);
 		
 		SDL_RenderPresent(renderer);
 		
