@@ -139,6 +139,12 @@ int main(int argc, char* argv[]) {
 				o = generateObject(init, previousLocation);
 			}
 		} else if (currentScreen == 1) {
+			if (isKeyPressed(SDL_SCANCODE_RETURN)) {
+				currentScreen = 0;
+				game.score = 0;
+				timer = 60;
+			}
+			
 			string text = "Your Score Was "+to_string(game.score);
 			surface = TTF_RenderText_Blended(font, text.c_str(), white);
 			texture = SDL_CreateTextureFromSurface(renderer, surface);
