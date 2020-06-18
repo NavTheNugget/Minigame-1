@@ -2,6 +2,7 @@
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <vector>
 #include <map>
 #include <random>
@@ -58,6 +59,12 @@ int main(int argc, char* argv[]) {
 	Game game;
 	game.score = 0;
 	
+	// Loading the Font
+	TTF_Init();
+	TTF_Font* font = TTF_OpenFont("Minecraft.ttf", 36);
+	SDL_Color white = { 0, 255, 0 };
+	SDL_Rect ScoreRectSize = { 0, 15, 0, 0 };
+	
 	while (running) {
 		frameStart = SDL_GetTicks();
 		
@@ -69,13 +76,19 @@ int main(int argc, char* argv[]) {
 			playerVelocity.x = -playerSpeed;
 		if (isKeyPressed(SDL_SCANCODE_D))
 			playerVelocity.x = playerSpeed;
-		else if (isKeyPressed(SDL_SCANCODE_S))
+		if (isKeyPressed(SDL_SCANCODE_S))
 			playerVelocity.y = playerSpeed;
-		else if (isKeyPressed(SDL_SCANCODE_W))
+		if (isKeyPressed(SDL_SCANCODE_W))
 			playerVelocity.y = -playerSpeed;
 		
 		player.x += playerVelocity.x;
 		player.y += playerVelocity.y;
+		
+		SDL_Surface* surface = TTF_RenderText_Blended(font, to_string(game.score).c_str(), white);
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+		
+		SDL_QueryTexture(texture, nullptr, nullptr, &ScoreRectSize.w, &ScoreRectSize.h);
+		ScoreRectSize.x = SCREEN_WIDTH-ScoreRectSize.w-15;
 		
 		if (checkCollision(o, player)) {
 			o->destroyed = true;
@@ -96,6 +109,8 @@ int main(int argc, char* argv[]) {
 			SDL_Rect objectRect = { (int)o->location.x, (int)o->location.y, 15, 15 };
 			SDL_RenderFillRect(renderer, &objectRect);
 		}
+		
+		SDL_RenderCopy(renderer, texture, nullptr, &ScoreRectSize);
 		
 		SDL_RenderPresent(renderer);
 		
