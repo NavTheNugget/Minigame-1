@@ -1,3 +1,3 @@
 run:
-	g++ main.cpp -g -std=c++17 -Wall -o game -I include -L lib -lSDL2-2.0.0 -lSDL2_image-2.0.0 -lSDL2_ttf-2.0.0
+	g++ main.cpp -g -std=c++17 -Wall -o game `pkg-config --libs --cflags sdl2 sdl2_ttf sdl2_image`
 	./game
