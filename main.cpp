@@ -101,13 +101,13 @@ int main(int argc, char* argv[]) {
 				ticks = 0;
 			}
 			
-			if (isKeyPressed(SDL_SCANCODE_A))
+			if (isKeyPressed(SDL_SCANCODE_A) || isKeyPressed(SDL_SCANCODE_LEFT))
 				playerVelocity.x = -playerSpeed;
-			if (isKeyPressed(SDL_SCANCODE_D))
+			if (isKeyPressed(SDL_SCANCODE_D) || isKeyPressed(SDL_SCANCODE_RIGHT))
 				playerVelocity.x = playerSpeed;
-			if (isKeyPressed(SDL_SCANCODE_S))
+			if (isKeyPressed(SDL_SCANCODE_S) || isKeyPressed(SDL_SCANCODE_DOWN))
 				playerVelocity.y = playerSpeed;
-			if (isKeyPressed(SDL_SCANCODE_W))
+			if (isKeyPressed(SDL_SCANCODE_W) || isKeyPressed(SDL_SCANCODE_UP))
 				playerVelocity.y = -playerSpeed;
 		
 			player.x += playerVelocity.x;
